@@ -21,6 +21,84 @@
       --header-h: 60px;
     }
 
+    /* ── Loading ── */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #f8f2e8 0%, #ede4d4 100%);
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .loading-inner { text-align: center; padding: 24px; }
+    .loading-kicker {
+      font-family: "Sora", sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeRise 1s 0.2s forwards ease;
+    }
+    .loading-name {
+      font-family: "RocknRoll One", sans-serif;
+      font-size: clamp(2.6rem, 9vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: 0.06em;
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+    }
+    .loading-name span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(100%);
+      animation: revealName 1.2s forwards ease;
+    }
+    .loading-name span:nth-child(1) { animation-delay: 0.0s; }
+    .loading-name span:nth-child(2) { animation-delay: 0.1s; }
+    .loading-name span:nth-child(3) { animation-delay: 0.2s; }
+    .loading-name span:nth-child(4) { animation-delay: 0.3s; }
+    .loading-name span:nth-child(5) { animation-delay: 0.4s; }
+    .loading-name span:nth-child(6) { animation-delay: 0.5s; }
+    .loading-bar {
+      width: min(260px, 70vw);
+      height: 2px;
+      margin: 22px auto 0;
+      background: rgba(28,25,22,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loading-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: slideBar 1.4s infinite ease;
+    }
+    @keyframes slideBar {
+      0%   { transform: translateX(-150%); }
+      100% { transform: translateX(350%); }
+    }
+    @keyframes revealName {
+      0%   { opacity: 0; transform: translateY(100%); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeRise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
@@ -464,6 +542,16 @@
 </head>
 <body>
 
+  <div class="loading-screen" id="loadingScreen" aria-hidden="true">
+    <div class="loading-inner">
+      <div class="loading-kicker">portfolio</div>
+      <h1 class="loading-name" aria-label="西村 ゆきを">
+        <span>西</span><span>村</span><span>&nbsp;</span><span>ゆ</span><span>き</span><span>を</span>
+      </h1>
+      <div class="loading-bar" aria-hidden="true"></div>
+    </div>
+  </div>
+
   <header class="site-header" id="siteHeader">
     <div class="header-inner">
       <a href="#hero" class="brand">
@@ -758,6 +846,14 @@
           return `<${tag} class="featured-card reveal" ${href}><div class="featured-card-media"><img src="${item.image}" alt="${item.title}" /><div class="featured-card-info"><div class="featured-card-label">Featured</div><div class="featured-card-title">${item.title}</div></div></div></${tag}>`;
         }).join('');
       }
+
+      const loadingScreen = document.getElementById('loadingScreen');
+      const hideLoader = () => {
+        if (!loadingScreen) return;
+        setTimeout(() => loadingScreen.classList.add('hidden'), 1200);
+      };
+      if (document.readyState === 'complete') hideLoader();
+      else window.addEventListener('load', hideLoader);
 
       const observer = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target); } });
